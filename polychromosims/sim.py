@@ -26,7 +26,7 @@ def createSim(reporters):
     if not isinstance(reporters, list):
         reporters = [reporters]
 
-    print('telling OpenMM to use GPU '+params.GPU)
+    sys.stderr.write('telling OpenMM to use GPU '+params.GPU)
     #Simulation object has many parameters that should be described in polychrom/simulation.py file 
     return simulation.Simulation(
             platform=params.platform,
