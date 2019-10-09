@@ -45,6 +45,9 @@ def proc(params):
         spec.loader.exec_module(mod)
         for var in  [var for var in dir(mod) if not var[0:2] == "__"]:
             setattr(params, var, getattr(mod, var))
+
+    if type(params.hetero_monTypes) == np.ndarray:
+        params.hetero_monTypes = params.hetero_monTypes.astype(int)
     
     # If desired, set PBC box according to given density
     if params.PBCbox == "density":
