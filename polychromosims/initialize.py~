@@ -29,6 +29,7 @@ def init(sysargv=sys.argv):
     sys.modules[params.__name__] = params
     globalvars.params_modspec = params_modspec
     
+    polychromosims.paramproc.update_from_cmd(params)
     globalvars.params_allow_execution = True
     polychromosims.paramproc.proc(params)
     globalvars.params_module = params
