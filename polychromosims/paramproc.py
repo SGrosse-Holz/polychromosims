@@ -39,7 +39,7 @@ def proc(params):
         except KeyError as key:
             print("WARNING: Did not find "+str(key)+" in file "+params.start_conf_name+". Using default.")
     elif params.start_from == "cubic" and params.start_cubic_box == None:
-        params.start_cubic_box = 5*int(N**(1/3))
+        params.start_cubic_box = 5*int(params.N**(1/3))
     elif params.start_from == "custom":
         spec = importlib.util.spec_from_file_location("startconf", params.start_custom_script)
         mod = importlib.util.module_from_spec(spec)
@@ -59,7 +59,7 @@ def proc(params):
     if isinstance(params.chain_nb_extrahard, str) and params.chain_nb_extrahard == "all":
         params.chain_nb_extrahard = np.arange(params.N)
     elif isinstance(params.chain_nb_extrahard, (int, float)):
-        params.chain_nb_extrahard = np.random.choice(N, int(params.chain_nb_extrahard*params.N), replace=False)
+        params.chain_nb_extrahard = np.random.choice(params.N, int(params.chain_nb_extrahard*params.N), replace=False)
     # else: chain_nb_extrahard is a list of indices already
     
     # Lamina attraction radius
