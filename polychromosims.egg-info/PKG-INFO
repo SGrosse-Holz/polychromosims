@@ -1,0 +1,12 @@
+Metadata-Version: 1.0
+Name: polychromosims
+Version: 0.0.0
+Summary: polychrom utilities
+Home-page: UNKNOWN
+Author: Simon Grosse-Holz
+Author-email: UNKNOWN
+License: UNKNOWN
+Description: # polychromosims
+        My attempt at a useful wrapper for polychrom (which is an OpenMM wrapper... where does this end?)
+        
+Platform: UNKNOWN
