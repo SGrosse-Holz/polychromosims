@@ -122,5 +122,8 @@ def start_editing(params):
     params.save_to = folder
     params.chain_nb_extrahard = extrahard
 
+    # Get command line values
+    update_from_cmd(params)
+
 def end_editing(params):
     proc(params)
