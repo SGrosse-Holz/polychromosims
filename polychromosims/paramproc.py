@@ -11,10 +11,8 @@ import polychromosims.globalvars as globalvars
 
 def update_from_cmd(params):
     # First things first: parse cmd arguments
-    sys.stderr.write(str(sys.argv)+"\n")
     for arg in sys.argv:
         if arg[:7] == "params.":
-            sys.stderr.write("setting "+arg+"\n")
             exec(arg)
 
 def proc(params):
@@ -130,8 +128,6 @@ def start_editing(params):
 
     # Get command line values
     update_from_cmd(params)
-    sys.stderr.write("After start_editing: GPU = "+params.GPU+"\n")
 
 def end_editing(params):
     proc(params)
-    sys.stderr.write("After editing params: GPU = "+params.GPU+"\n")

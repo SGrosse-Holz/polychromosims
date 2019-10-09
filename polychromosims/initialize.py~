@@ -34,6 +34,8 @@ def init(sysargv=sys.argv):
     polychromosims.paramproc.proc(params)
     globalvars.params_module = params
     import polychromosims.sim as sim
+
+    sys.stderr.write("After importing sim: params.GPU = "+params.GPU+"\n")
     
     # Save relevant files with the data
     shutil.copyfile(myparamsfile, os.path.join(params.folder, 'params.py'))
