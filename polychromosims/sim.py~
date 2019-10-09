@@ -162,3 +162,15 @@ def saveFinal(sim, reporter):
         reportDict['hetero_monTypes'] = params.hetero_monTypes
 
     reporter.report("final_conformation", reportDict)
+
+def fullSim(reporter):
+    """
+    A wrapper for everything happening here, assuming that all of this is
+    basically always the same.
+    """
+    simobj = createSim(reporter)
+    simobj = setStartingConf(simobj)
+    simobj = addForces(simobj)
+    simobj = runSim(simobj)
+    saveFinal(simobj, reporter)
+    reporter.dump_data()
