@@ -1,3 +1,3 @@
 from polychromosims.initialize import init, finalize
-import polychromosims.globalvars
-import polychromosims.paramproc
+from . import globalvars
+from . import paramproc

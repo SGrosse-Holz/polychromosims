@@ -7,14 +7,11 @@ import numpy as np
 from polychrom.hdf5_format import load_hdf5_file
 
 from mootils.save_module_to_script import mod2py
-import polychromosims.globalvars as globalvars
+from polychromosims import globalvars
 
 def update_from_cmd(params):
-    # First things first: parse cmd arguments
-    sys.stderr.write(str(sys.argv)+"\n")
     for arg in sys.argv:
         if arg[:7] == "params.":
-            sys.stderr.write("setting "+arg+"\n")
             exec(arg)
 
 def proc(params):
@@ -49,24 +46,38 @@ def proc(params):
         for var in  [var for var in dir(mod) if not var[0:2] == "__"]:
             setattr(params, var, getattr(mod, var))
 
-    if type(params.hetero_monTypes) == np.ndarray:
-        params.hetero_monTypes = params.hetero_monTypes.astype(int)
+    for i, ch in enumerate(params.chains):
+        if ch[1] is None:
+            params.chains[i] = (ch[0], params.N, ch[2])
+
+    if params.chain_nonbonded == "hetero":
+        if type(params.hetero_monTypes) == np.ndarray:
+            params.hetero_monTypes = params.hetero_monTypes.astype(int)
+    
+        # Convert chain_nb_extrahard to an actual list
+        if isinstance(params.chain_nb_extrahard, str) and params.chain_nb_extrahard == "all":
+            params.chain_nb_extrahard = np.arange(params.N)
+        elif isinstance(params.chain_nb_extrahard, (int, float)):
+            params.chain_nb_extrahard = np.random.choice(params.N, int(params.chain_nb_extrahard*params.N), replace=False)
+        # else: chain_nb_extrahard is a list of indices already
     
     # If desired, set PBC box according to given density
     if params.PBCbox == "density":
         pbcdim = (params.N * params.sphconf_density)**(1/3)
         params.PBCbox = [pbcdim, pbcdim, pbcdim]
     
-    # Convert chain_nb_extrahard to an actual list
-    if isinstance(params.chain_nb_extrahard, str) and params.chain_nb_extrahard == "all":
-        params.chain_nb_extrahard = np.arange(params.N)
-    elif isinstance(params.chain_nb_extrahard, (int, float)):
-        params.chain_nb_extrahard = np.random.choice(params.N, int(params.chain_nb_extrahard*params.N), replace=False)
-    # else: chain_nb_extrahard is a list of indices already
-    
     # Lamina attraction radius
-    if params.lam_r == "sphconf_density":
-        params.lam_r = (3 * params.N / (4 * 3.141592 * params.sphconf_density)) ** (1 / 3.) # from polychrom.forces.spherical_confinement
+    if params.add_lamina_attraction:
+        if params.lam_r == "sphconf_density":
+            # from polychrom.forces.spherical_confinement
+            params.lam_r = (3 * params.N / (4 * 3.141592 * params.sphconf_density)) ** (1 / 3.)
+
+    # Extrusion reinitialization
+    if params.has_extrusion:
+        params.extrusion_blocksPerRestart = np.ceil(params.extrusion_stepsPerRestart / params.extrusion_stepsPerBlock).astype(int)
+        params.extrusion_stepsPerRestart = params.extrusion_blocksPerRestart * params.extrusion_stepsPerBlock
+        params.extrusion_totalRestarts = np.ceil(params.total_blocks / params.extrusion_blocksPerRestart).astype(int)
+
     
     # Generate the folder name and create it
     if params.save_to == "new folder":
@@ -115,7 +126,8 @@ def write_processed(params):
 def start_editing(params):
     # Save the stuff that should not be reloaded
     folder = params.folder
-    extrahard = params.chain_nb_extrahard
+    if params.chain_nonbonded == "hetero":
+        extrahard = params.chain_nb_extrahard
 
     params_modspec = globalvars.params_modspec
 
@@ -126,12 +138,11 @@ def start_editing(params):
 
     # Set saved stuff
     params.save_to = folder
-    params.chain_nb_extrahard = extrahard
+    if params.chain_nonbonded == "hetero":
+        params.chain_nb_extrahard = extrahard
 
     # Get command line values
     update_from_cmd(params)
-    sys.stderr.write("After start_editing: GPU = "+params.GPU+"\n")
 
 def end_editing(params):
     proc(params)
-    sys.stderr.write("After editing params: GPU = "+params.GPU+"\n")

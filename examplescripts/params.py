@@ -2,7 +2,7 @@ import numpy as np
 from mootils import paramtools
 
 # Control center: a bunch of useful switches
-steps_per_block = 1000 # TODO: clean this up
+steps_per_block = 5000
 total_blocks = 10
 save_to = "generic" # "new folder", "generic" or path to an existing folder
 
@@ -10,6 +10,7 @@ start_from = "custom" # cubic, conf, custom
 add_spherical_confinement = True
 add_lamina_attraction = True
 add_pulling = False
+has_extrusion = False
 
 # Saving data
 base_folder = "/net/levsha/share/simongh/sims/data/locus_pulling_equilibration"
@@ -75,6 +76,19 @@ hetero_overwrite_conf = False # If there are compartment IDs in the given starti
 pulled_locus = paramtools.pulled_locus_Ed()
 pull_direction = "center" # [x, y, z] or "center": pull towards center of mass
 pull_force = 1.0
+
+### EXTRUSION
+extrusion_smc_N = 100
+extrusion_smc_lifeInBlocks = 10
+extrusion_smc_bondwiggledist = 0.2
+extrusion_smc_bondDist = 0.5
+
+extrusion_stepsPerBlock = 10
+extrusion_stepsPerRestart = 100
+
+extrusion_CTCFs = paramtools.ctcf_sites(N)
+extrusion_p_capture = 0.5
+extrusion_p_releasePerStep = 0.02
 
 # Energy minimization
 do_energy_minimization = True # Automatically switched off when starting from conf

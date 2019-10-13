@@ -22,7 +22,7 @@ def init(sysargv=sys.argv):
     """
     # The paramscript is given as commandline argument, so we have to load it dynamically.
     # NOTE: the GPU=... argument was replaced by giving params.GPU = ...
-    myparamsfile = (["scripts/params/generic.py"] + [arg[12:] for arg in sysargv if 'paramscript=' in arg])[-1]
+    myparamsfile = (["params.py"] + [arg[12:] for arg in sysargv if 'paramscript=' in arg])[-1]
     params_modspec = importlib.util.spec_from_file_location("params", myparamsfile)
     params = importlib.util.module_from_spec(params_modspec)
     params_modspec.loader.exec_module(params)

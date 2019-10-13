@@ -4,6 +4,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import os,sys
 import shutil
+import time
 import warnings
 import importlib
 import polychrom
@@ -14,7 +15,9 @@ from polychrom.hdf5_format import HDF5Reporter, load_hdf5_file, load_URI
 
 import numpy as np
 
-import polychromosims.globalvars as globalvars
+from .extrusion_1d import run_1d
+from .bondUpdater import bondUpdater
+from . import globalvars
 try:
     params = globalvars.params_module
 except:
@@ -168,9 +171,84 @@ def fullSim(reporter):
     A wrapper for everything happening here, assuming that all of this is
     basically always the same.
     """
-    simobj = createSim(reporter)
-    simobj = setStartingConf(simobj)
-    simobj = addForces(simobj)
-    simobj = runSim(simobj)
+    if params.has_extrusion:
+        simobj = _do_extrusion(reporter)
+    else:
+        simobj = createSim(reporter)
+        simobj = setStartingConf(simobj)
+        simobj = addForces(simobj)
+        simobj = runSim(simobj)
+
     saveFinal(simobj, reporter)
     reporter.dump_data()
+
+def _do_extrusion(reporter):
+    """
+    This is a bit more tricky, because we have to restart the simulation every
+    now and then.
+    """
+    # Do the 1d simulation
+    strand_ends = []
+    for ch in params.chains:
+        strand_ends.append(ch[0])
+        strand_ends.append(ch[1]-1)
+        # TODO: circular chromosomes
+    LEFs = run_1d(params.N,
+                  params.extrusion_smc_N,
+                  params.total_blocks*params.extrusion_stepsPerBlock,
+                  params.extrusion_CTCFs,
+                  lifetime=params.extrusion_smc_lifeInBlocks*params.extrusion_stepsPerBlock,
+                  boundaries={2 : strand_ends},
+                  p_capture=params.extrusion_p_capture,
+                  p_release=params.extrusion_p_releasePerStep)
+    reporter.report("LEF_positions", {"LEFs" : LEFs[slice(0, -1, params.extrusion_stepsPerBlock)]})
+
+    # Do the 3d simulation
+    for i_restart in range(params.extrusion_totalRestarts):
+        simobj = createSim(reporter)
+        if i_restart == 0:
+            simobj = setStartingConf(simobj)
+        else:
+            simobj.set_data(simdata)
+
+        simobj = addForces(simobj)
+    
+        # Set up the bond updating for extrusion
+        # (stolen from Max)
+        milker = bondUpdater(LEFs)
+        kbond = simobj.kbondScalingFactor / (params.extrusion_smc_bondwiggledist**2)
+        bondDist = params.extrusion_smc_bondDist * simobj.length_scale
+    
+        activeParams = {"length" : bondDist, "k" : kbond}
+        inactiveParams = {"length" : bondDist, "k" : 0}
+    
+        milker.setParams(activeParams, inactiveParams)
+        milker.setup(bondForce=simobj.force_dict["harmonic_bonds"],
+                    blocks=params.extrusion_stepsPerRestart)
+
+        if i_restart == 0 and params.do_energy_minimization:    
+            simobj.local_energy_minimization(tolerance=params.emin_tolerance,
+                                             maxIterations=params.emin_maxIter,
+                                             random_offset=params.emin_randomOffset)
+
+        # This is in do_block and local_energy_minimization, but neither is
+        # necessarily called before the first steps
+        simobj._apply_forces()
+
+        # Run this restart
+        for i in range(params.extrusion_blocksPerRestart):
+            for _ in range(params.extrusion_stepsPerBlock-1):
+                simobj.integrator.step(steps=params.steps_per_block)
+                curBonds, pastBonds = milker.step(simobj.context)
+            # do the final block, which saves the conformation
+            simobj.do_block(steps = params.steps_per_block)
+            if i < params.extrusion_blocksPerRestart-1:
+                curBonds, pastBonds = milker.step(simobj.context)
+
+        simdata = simobj.get_data()
+        simobj.print_stats()
+        if i_restart == params.extrusion_totalRestarts-1:
+            return simobj
+
+        reporter.blocks_only = True
+        time.sleep(0.2) # let garbage be collected
