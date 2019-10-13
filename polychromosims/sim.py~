@@ -226,6 +226,8 @@ def _do_extrusion(reporter):
         milker.setup(bondForce=simobj.force_dict["harmonic_bonds"],
                     blocks=params.extrusion_stepsPerRestart)
 
+        print(params.chains)
+
         if i_restart == 0 and params.do_energy_minimization:    
             simobj.local_energy_minimization(tolerance=params.emin_tolerance,
                                              maxIterations=params.emin_maxIter,
@@ -247,8 +249,8 @@ def _do_extrusion(reporter):
 
         simdata = simobj.get_data()
         simobj.print_stats()
-        del simobj
+        if i_restart == params.extrusion_totalRestarts-1:
+            return simobj
 
         reporter.blocks_only = True
-
         time.sleep(0.2) # let garbage be collected
