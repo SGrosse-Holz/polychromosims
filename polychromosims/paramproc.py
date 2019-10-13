@@ -113,7 +113,7 @@ def proc(params):
     params.save_to = params.folder
 
     # Sanity checks on everything that contains explicit particle indices
-    if any(np.array(params.chains)[:, 0:2] > params.N):
+    if (np.array(params.chains)[:, 0:2] > params.N).any():
         raise RuntimeError("chain specification {0} is not compatible with only {1} monomers in the simulation!".format(str(params.chains), params.N))
     if max(params.extrusion_CTCFs) >= params.N:
         params.extrusion_CTCFs = params.extrusion_CTCFs(np.where(params.extrusion_CTCFs < params.N))
