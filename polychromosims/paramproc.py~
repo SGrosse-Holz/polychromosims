@@ -48,7 +48,7 @@ def proc(params):
 
     for i, ch in enumerate(params.chains):
         if ch[1] is None:
-            params.chains[i] = (ch[0], params.N-1, ch[2])
+            params.chains[i] = (ch[0], params.N, ch[2])
 
     if params.chain_nonbonded == "hetero":
         if type(params.hetero_monTypes) == np.ndarray:

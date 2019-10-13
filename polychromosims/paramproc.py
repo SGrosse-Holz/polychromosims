@@ -111,6 +111,16 @@ def proc(params):
     # Make sure that upon a repeated execution we do not unintentionally change the
     # folder name
     params.save_to = params.folder
+
+    # Sanity checks on everything that contains explicit particle indices
+    if any(np.array(params.chains)[:, 0:2] > params.N):
+        raise RuntimeError("chain specification {0} is not compatible with only {1} monomers in the simulation!".format(str(params.chains), params.N))
+    if max(params.extrusion_CTCFs) >= params.N:
+        params.extrusion_CTCFs = params.extrusion_CTCFs(np.where(params.extrusion_CTCFs < params.N))
+        raise RuntimeWarning("List of CTCFs too long for {0} monomers, truncating...".format(params.N))
+    if max(params.lam_particles) >= params.N:
+        params.lam_particles = params.lam_particles(np.where(params.lam_particles < params.N))
+        raise RuntimeWarning("List of lamina attracted particles too long for {0} monomers, truncating...".format(params.N))
     
 def write_processed(params):
     bare_filename = os.path.join(params.folder, 'processed_params')
