@@ -113,14 +113,14 @@ def proc(params):
     params.save_to = params.folder
 
     # Sanity checks on everything that contains explicit particle indices
-    if (np.array(params.chains)[:, 0:2] > params.N).any():
-        raise RuntimeError("chain specification {0} is not compatible with only {1} monomers in the simulation!".format(str(params.chains), params.N))
-    if max(params.extrusion_CTCFs) >= params.N:
-        params.extrusion_CTCFs = params.extrusion_CTCFs[np.where(np.array(params.extrusion_CTCFs) < params.N)]
-        raise RuntimeWarning("List of CTCFs too long for {0} monomers, truncating...".format(params.N))
-    if max(params.lam_particles) >= params.N:
-        params.lam_particles = params.lam_particles[np.where(np.array(params.lam_particles) < params.N)]
-        raise RuntimeWarning("List of lamina attracted particles too long for {0} monomers, truncating...".format(params.N))
+    #if (np.array(params.chains)[:, 0:2] > params.N).any():
+        #raise RuntimeError("chain specification {0} is not compatible with only {1} monomers in the simulation!".format(str(params.chains), params.N))
+    #if max(params.extrusion_CTCFs) >= params.N:
+        #params.extrusion_CTCFs = params.extrusion_CTCFs[np.where(np.array(params.extrusion_CTCFs) < params.N)]
+        #raise RuntimeWarning("List of CTCFs too long for {0} monomers, truncating...".format(params.N))
+    #if max(params.lam_particles) >= params.N:
+        #params.lam_particles = params.lam_particles[np.where(np.array(params.lam_particles) < params.N)]
+        #raise RuntimeWarning("List of lamina attracted particles too long for {0} monomers, truncating...".format(params.N))
     
 def write_processed(params):
     bare_filename = os.path.join(params.folder, 'processed_params')
