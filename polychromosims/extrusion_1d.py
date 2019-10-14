@@ -56,16 +56,20 @@ def unloadProb(cohesin, occupied, args):
     
 
 
-def loadOne(cohesins, occupied, args): 
+def loadOne(cohesins, occupied, args, i=None):
     """
-    A function to load one cohesin 
+    A function to load one cohesin
+    i : position to insert the cohesin at. This keeps the list in order.
     """
     while True:
         a = np.random.randint(args["N"])
         if (occupied[a] == 0) and (occupied[a+1] == 0):
             occupied[a] = 1
             occupied[a+1] = 1 
-            cohesins.append(cohesin(leg(a), leg(a+1)))
+            if i is None:
+                cohesins.append(cohesin(leg(a), leg(a+1)))
+            else:
+                cohesins[i] = cohesin(leg(a), leg(a+1))
             break
 
 
@@ -117,8 +121,13 @@ def translocate(cohesins, occupied, args):
         if np.random.random() <= prob:
             occupied[cohesins[i].left.pos] = 0 
             occupied[cohesins[i].right.pos] = 0 
-            del cohesins[i]
-            loadOne(cohesins, occupied, args)
+            loadOne(cohesins, occupied, args, i)
+            # Artificially restep 1, such that the first position for the newly
+            # loaded one is actually on two adjacent monomers
+            # Note: the occupied array will be set properly below.
+            for leg in [-1, 1]:
+                occupied[cohesins[i][leg].pos] = 0
+                cohesins[i][leg].pos -= leg
     
     # then we try to capture and release them by CTCF sites 
     for i in range(len(cohesins)):
@@ -199,11 +208,11 @@ def run_1d(N_mono, N_SMC, frames, CTCFs, lifetime=100, p_capture=0.5,
         print('Warning: no boundary specified at end. Assuming strand end.')
 
     cohesins = []
-    for _ in range(N_SMC):
+    for i in range(N_SMC):
         loadOne(cohesins, occupied, args)
 
-    LEFpositions = []
-    for _ in range(frames):
+    LEFpositions = [[(coh.left.pos, coh.right.pos) for coh in cohesins]]
+    for _ in range(frames-1):
         translocate(cohesins, occupied, args)
         LEFpositions.append([(coh.left.pos, coh.right.pos) for coh in cohesins])
 
