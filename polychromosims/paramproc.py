@@ -74,10 +74,11 @@ def proc(params):
 
     # Extrusion reinitialization
     if params.has_extrusion:
-        params.extrusion_blocksPerRestart = np.ceil(params.extrusion_stepsPerRestart / params.extrusion_stepsPerBlock).astype(int)
+        params.extrusion_stepsPerBlock = max(params.steps_per_block // params.extrusion_MDstepsPerStep, 1)
+        params.steps_per_block = params.extrusion_MDstepsPerStep*params.extrusion_stepsPerBlock
+        params.extrusion_blocksPerRestart = params.extrusion_stepsPerRestart // params.extrusion_stepsPerBlock + 1
         params.extrusion_stepsPerRestart = params.extrusion_blocksPerRestart * params.extrusion_stepsPerBlock
-        params.extrusion_totalRestarts = np.ceil(params.total_blocks / params.extrusion_blocksPerRestart).astype(int)
-        params.extrusion_smc_N = params.N // params.extrusion_smc_sep
+        params.extrusion_totalRestarts = params.total_blocks // params.extrusion_blocksPerRestart + 1
 
     
     # Generate the folder name and create it

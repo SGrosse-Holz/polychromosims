@@ -194,10 +194,10 @@ def _do_extrusion(reporter):
         strand_ends.append(ch[1]-1)
         # TODO: circular chromosomes
     LEFs = run_1d(params.N,
-                  params.extrusion_smc_N,
+                  params.N // params.extrusion_separation,
                   params.total_blocks*params.extrusion_stepsPerBlock,
                   params.extrusion_CTCFs,
-                  lifetime=params.extrusion_smc_lifeInBlocks*params.extrusion_stepsPerBlock,
+                  lifetime=params.extrusion_processivity,
                   boundaries={2 : strand_ends},
                   p_capture=params.extrusion_p_capture,
                   p_release=params.extrusion_p_releasePerStep)

@@ -204,6 +204,7 @@ def _do_extrusion(reporter):
     reporter.report("LEF_positions", {"LEFs" : LEFs[slice(0, -1, params.extrusion_stepsPerBlock)]})
 
     # Do the 3d simulation
+    milker = bondUpdater(LEFs)
     for i_restart in range(params.extrusion_totalRestarts):
         simobj = createSim(reporter)
         if i_restart == 0:
@@ -215,7 +216,6 @@ def _do_extrusion(reporter):
     
         # Set up the bond updating for extrusion
         # (stolen from Max)
-        milker = bondUpdater(LEFs)
         kbond = simobj.kbondScalingFactor / (params.extrusion_smc_bondwiggledist**2)
         bondDist = params.extrusion_smc_bondDist * simobj.length_scale
     

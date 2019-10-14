@@ -78,13 +78,14 @@ pull_direction = "center" # [x, y, z] or "center": pull towards center of mass
 pull_force = 1.0
 
 ### EXTRUSION
-extrusion_smc_N = 100
-extrusion_smc_lifeInBlocks = 10
+extrusion_separation = 400
+extrusion_processivity = 200
+
+extrusion_MDstepsPerStep = 1000
+extrusion_stepsPerRestart = 100
+
 extrusion_smc_bondwiggledist = 0.2
 extrusion_smc_bondDist = 0.5
-
-extrusion_stepsPerBlock = 10
-extrusion_stepsPerRestart = 100
 
 extrusion_CTCFs = paramtools.ctcf_sites(N)
 extrusion_p_capture = 0.5

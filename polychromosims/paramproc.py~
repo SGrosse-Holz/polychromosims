@@ -74,9 +74,13 @@ def proc(params):
 
     # Extrusion reinitialization
     if params.has_extrusion:
-        params.extrusion_blocksPerRestart = np.ceil(params.extrusion_stepsPerRestart / params.extrusion_stepsPerBlock).astype(int)
+        params.extrusion_stepsPerBlock = max(params.steps_per_block // params.extrusion_MDstepsPerStep, 1)
+        params.steps_per_block = params.extrusion_MDstepsPerStep*params.extrusion_stepsPerBlock
+
+
+        params.extrusion_blocksPerRestart = params.extrusion_stepsPerRestart // params.extrusion_stepsPerBlock + 1
         params.extrusion_stepsPerRestart = params.extrusion_blocksPerRestart * params.extrusion_stepsPerBlock
-        params.extrusion_totalRestarts = np.ceil(params.total_blocks / params.extrusion_blocksPerRestart).astype(int)
+        params.extrusion_totalRestarts = params.total_blocks // params.extrusion_blocksPerRestart + 1
         params.extrusion_smc_N = params.N // params.extrusion_smc_sep
 
     
@@ -113,14 +117,14 @@ def proc(params):
     params.save_to = params.folder
 
     # Sanity checks on everything that contains explicit particle indices
-    if (np.array(params.chains)[:, 0:2] > params.N).any():
-        raise RuntimeError("chain specification {0} is not compatible with only {1} monomers in the simulation!".format(str(params.chains), params.N))
-    if max(params.extrusion_CTCFs) >= params.N:
-        params.extrusion_CTCFs = params.extrusion_CTCFs[np.where(np.array(params.extrusion_CTCFs) < params.N)]
-        raise RuntimeWarning("List of CTCFs too long for {0} monomers, truncating...".format(params.N))
-    if max(params.lam_particles) >= params.N:
-        params.lam_particles = params.lam_particles[np.where(np.array(params.lam_particles) < params.N)]
-        raise RuntimeWarning("List of lamina attracted particles too long for {0} monomers, truncating...".format(params.N))
+    #if (np.array(params.chains)[:, 0:2] > params.N).any():
+        #raise RuntimeError("chain specification {0} is not compatible with only {1} monomers in the simulation!".format(str(params.chains), params.N))
+    #if max(params.extrusion_CTCFs) >= params.N:
+        #params.extrusion_CTCFs = params.extrusion_CTCFs[np.where(np.array(params.extrusion_CTCFs) < params.N)]
+        #raise RuntimeWarning("List of CTCFs too long for {0} monomers, truncating...".format(params.N))
+    #if max(params.lam_particles) >= params.N:
+        #params.lam_particles = params.lam_particles[np.where(np.array(params.lam_particles) < params.N)]
+        #raise RuntimeWarning("List of lamina attracted particles too long for {0} monomers, truncating...".format(params.N))
     
 def write_processed(params):
     bare_filename = os.path.join(params.folder, 'processed_params')
