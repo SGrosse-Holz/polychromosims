@@ -150,8 +150,9 @@ def translocate(cohesins, occupied, args):
                     cohesin[leg].pos += leg        
         cohesins[i] = cohesin
 
-def run_1d(N_mono, N_SMC, frames, CTCFs, lifetime=100, p_capture=0.5,
-        p_release=0.02, lifetime_stalled=None, boundaries={1:[],2:[]}):
+def run_1d(N_mono, N_SMC, frames, CTCFs_left, CTCFs_right=None, lifetime=100,
+        p_capture=0.5, p_release=0.02, lifetime_stalled=None,
+        boundaries={1:[],2:[]}):
     """
     Do the 1d simulation
 
@@ -163,8 +164,12 @@ def run_1d(N_mono, N_SMC, frames, CTCFs, lifetime=100, p_capture=0.5,
         number of SMCs to throw on
     frames : int
         number of steps to simulate
-    CTCFs : array-like
-        indices of CTCF sites
+    CTCFs_left : array-like
+        indices of CTCF sites that stop left-moving cohesin
+    CTCFs_right : array-like
+        indices of CTCF sites that stop right-moving cohesin
+        default: None. In this case, will be the same as CTCFs_left, such that
+            CTCFs are bi-directional (for backwards compatibility)
     p_capture : float
         probability that a CTCF will catch a passing cohesin
     p_release : float
@@ -187,12 +192,17 @@ def run_1d(N_mono, N_SMC, frames, CTCFs, lifetime=100, p_capture=0.5,
     if lifetime_stalled is None:
         lifetime_stalled = lifetime
 
-    ctcfCapture = {ctcf : p_capture for ctcf in CTCFs}
-    ctcfRelease = {ctcf : p_release for ctcf in CTCFs}
+    if CTCFs_right is None:
+        CTCFs_right = CTCFs_left
+
+    ctcfCaptureleft = {ctcf : p_capture for ctcf in CTCFs_left}
+    ctcfReleaseleft = {ctcf : p_release for ctcf in CTCFs_left}
+    ctcfCaptureright = {ctcf : p_capture for ctcf in CTCFs_right}
+    ctcfReleaseright = {ctcf : p_release for ctcf in CTCFs_right}
 
     args = {}
-    args['ctcfRelease'] = {-1 : ctcfRelease, 1 : ctcfRelease}
-    args['ctcfCapture'] = {-1 : ctcfCapture, 1 : ctcfCapture}
+    args['ctcfRelease'] = {-1 : ctcfReleaseleft, 1 : ctcfReleaseright}
+    args['ctcfCapture'] = {-1 : ctcfCaptureleft, 1 : ctcfCaptureright}
     args['N'] = N_mono
     args['LIFETIME'] = lifetime
     args['LIFETIME_STALLED'] = lifetime_stalled
