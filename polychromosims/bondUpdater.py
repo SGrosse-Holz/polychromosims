@@ -44,6 +44,7 @@ class bondUpdater(object):
         allBonds = []
         
         loaded_positions  = self.LEFpositions[self.curtime : self.curtime+blocks]
+        sys.err('loaded_positions.shape = {}'.format(loaded_positions.shape))
         allBonds = [[(int(loaded_positions[i, j, 0]), int(loaded_positions[i, j, 1])) 
                         for j in range(loaded_positions.shape[1])] for i in range(blocks)]
 
