@@ -86,6 +86,10 @@ def addForces(sim):
                 'attractionEnergy':params.chain_nb_attrEnergy,
                 'attractionRadius':params.chain_nb_attrRadius,
                 'name':'smooth_square_well'}
+    elif params.chain_nonbonded == "polynomial":
+        nb_force = forces.polynomial_repulsive
+        nb_kwargs = {
+                'trunc':params.chain_nb_repEnergy}
     else:
         raise ValueError(params.errorString("chain_nonbonded", params.chain_nonbonded))
 
