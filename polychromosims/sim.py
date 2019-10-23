@@ -196,12 +196,10 @@ def _do_extrusion(reporter):
     LEFs = run_1d(params.N,
                   params.N // params.extrusion_separation,
                   params.total_blocks*params.extrusion_stepsPerBlock,
-                  params.extrusion_CTCFs[0],
-                  params.extrusion_CTCFs[1],
+                  CTCF_dict=params.extrusion_CTCFdict,
                   lifetime=params.extrusion_processivity,
-                  boundaries={2 : strand_ends},
-                  p_capture=params.extrusion_p_capture,
-                  p_release=params.extrusion_p_releasePerStep)
+                  lifetime_stalled=params.extrusion_processivity_stalled,
+                  boundaries={2 : strand_ends})
     reporter.report("LEF_positions", {"LEFs" : LEFs[slice(0, -1, params.extrusion_stepsPerBlock)]})
 
     # Do the 3d simulation

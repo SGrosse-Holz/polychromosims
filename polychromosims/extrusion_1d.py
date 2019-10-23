@@ -47,9 +47,12 @@ def unloadProb(cohesin, occupied, args):
     if occupied[cohesin.left.pos-1] == 2 or occupied[cohesin.right.pos+1] == 2:
         return 1
 
-    if cohesin.any("stalled"):
-        # if one side is stalled, we have different unloading probability 
-        # Note that here we define stalled cohesins as those stalled not at CTCFs 
+    #if cohesin.any("stalled"):
+        ## if one side is stalled, we have different unloading probability 
+        ## Note that here we define stalled cohesins as those stalled not at CTCFs 
+        #return 1 / args["LIFETIME_STALLED"]
+    if cohesin.any("CTCF"):
+        # Change Max's code: lifetime_stalled now is lifetime at CTCF
         return 1 / args["LIFETIME_STALLED"]
     # otherwise we are just simply unloading 
     return 1 / args["LIFETIME"]    
@@ -150,8 +153,10 @@ def translocate(cohesins, occupied, args):
                     cohesin[leg].pos += leg        
         cohesins[i] = cohesin
 
-def run_1d(N_mono, N_SMC, frames, CTCFs_left, CTCFs_right=None, lifetime=100,
-        p_capture=0.5, p_release=0.02, lifetime_stalled=None,
+def run_1d(N_mono, N_SMC, frames,
+        CTCFs_left=None, CTCFs_right=None, CTCF_dict=None,
+        lifetime=100, lifetime_stalled=None,
+        p_capture=0.5, p_release=0.02,
         boundaries={1:[],2:[]}):
     """
     Do the 1d simulation
@@ -170,6 +175,9 @@ def run_1d(N_mono, N_SMC, frames, CTCFs_left, CTCFs_right=None, lifetime=100,
         indices of CTCF sites that stop right-moving cohesin
         default: None. In this case, will be the same as CTCFs_left, such that
             CTCFs are bi-directional (for backwards compatibility)
+    CTCF_dict : dict
+        a dict of structure {'captureLeft' : {}, 'captureRight' : {},
+                             'releaseLeft' : {}, 'releaseRight' : {} }
     p_capture : float
         probability that a CTCF will catch a passing cohesin
     p_release : float
@@ -192,13 +200,26 @@ def run_1d(N_mono, N_SMC, frames, CTCFs_left, CTCFs_right=None, lifetime=100,
     if lifetime_stalled is None:
         lifetime_stalled = lifetime
 
-    if CTCFs_right is None:
-        CTCFs_right = CTCFs_left
+    # Note: we don't necessarily need CTCFs, so if none are given, run with none...
+    ctcfCaptureleft = {}
+    ctcfReleaseleft = {}
+    ctcfCaptureright = {}
+    ctcfReleaseright = {}
 
-    ctcfCaptureleft = {ctcf : p_capture for ctcf in CTCFs_left}
-    ctcfReleaseleft = {ctcf : p_release for ctcf in CTCFs_left}
-    ctcfCaptureright = {ctcf : p_capture for ctcf in CTCFs_right}
-    ctcfReleaseright = {ctcf : p_release for ctcf in CTCFs_right}
+    if CTCFs_left is not None:
+        if CTCFs_right is None:
+            CTCFs_right = CTCFs_left
+
+        ctcfCaptureleft = {ctcf : p_capture for ctcf in CTCFs_left}
+        ctcfReleaseleft = {ctcf : p_release for ctcf in CTCFs_left}
+        ctcfCaptureright = {ctcf : p_capture for ctcf in CTCFs_right}
+        ctcfReleaseright = {ctcf : p_release for ctcf in CTCFs_right}
+    
+    if CTCF_dict is not None:
+        ctcfCaptureleft = CTCF_dict['captureLeft']
+        ctcfCaptureright = CTCF_dict['captureRight']
+        ctcfReleaseleft = CTCF_dict['releaseLeft']
+        ctcfReleaseleft = CTCF_dict['releaseRight']
 
     args = {}
     args['ctcfRelease'] = {-1 : ctcfReleaseleft, 1 : ctcfReleaseright}

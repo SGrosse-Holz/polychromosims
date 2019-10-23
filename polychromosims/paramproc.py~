@@ -3,6 +3,7 @@ import importlib
 import datetime
 
 import numpy as np
+import math
 
 from polychrom.hdf5_format import load_hdf5_file
 
@@ -76,9 +77,9 @@ def proc(params):
     if params.has_extrusion:
         params.extrusion_stepsPerBlock = max(params.steps_per_block // params.extrusion_MDstepsPerStep, 1)
         params.steps_per_block = params.extrusion_MDstepsPerStep*params.extrusion_stepsPerBlock
-        params.extrusion_blocksPerRestart = params.extrusion_stepsPerRestart // params.extrusion_stepsPerBlock + 1
+        params.extrusion_blocksPerRestart = math.ceil(params.extrusion_stepsPerRestart / params.extrusion_stepsPerBlock)
         params.extrusion_stepsPerRestart = params.extrusion_blocksPerRestart * params.extrusion_stepsPerBlock
-        params.extrusion_totalRestarts = params.total_blocks // params.extrusion_blocksPerRestart + 1
+        params.extrusion_totalRestarts = math.ceil(params.total_blocks / params.extrusion_blocksPerRestart)
 
     
     # Generate the folder name and create it
