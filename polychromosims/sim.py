@@ -237,10 +237,10 @@ def _do_extrusion(reporter):
         # Run this restart
         for i in range(params.extrusion_blocksPerRestart):
             for _ in range(params.extrusion_stepsPerBlock-1):
-                simobj.integrator.step(steps=params.steps_per_block)
+                simobj.integrator.step(steps=params.extrusion_MDstepsPerStep)
                 curBonds, pastBonds = milker.step(simobj.context)
             # do the final block, which saves the conformation
-            simobj.do_block(steps = params.steps_per_block)
+            simobj.do_block(steps = params.extrusion_MDstepsPerStep)
             if i < params.extrusion_blocksPerRestart-1:
                 curBonds, pastBonds = milker.step(simobj.context)
 
