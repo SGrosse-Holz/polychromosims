@@ -114,6 +114,18 @@ def addForces(sim):
         )
     )
 
+    # Crosslinks, i.e. extra harmonic bonds
+    if params.add_crosslinks:
+        sim.add_force(
+            forces.harmonic_bonds(
+                sim,
+                params.cl_bonds,
+                params.cl_bondWiggleDist,
+                params.cl_bondLength,
+                name="crosslinks"
+            )
+        )
+
     # Lamina attraction
     if params.add_lamina_attraction:
         sim.add_force(

@@ -102,13 +102,15 @@ def release(cohesin, occupied, args):
     """
     
     if not cohesin.any("CTCF"):
-        return cohesin  # no CTCF: no release necessary 
+        return 0  # no CTCF: no release necessary 
         
     # attempting to release either side 
+    released = 0
     for side in [-1, 1]: 
         if (np.random.random() < args["ctcfRelease"][side].get(cohesin[side].pos, 0)) and (cohesin[side].attrs["CTCF"]):
             cohesin[side].attrs["CTCF"] = False 
-    return cohesin 
+            released += 1
+    return released
 
 
 def translocate(cohesins, occupied, args):
@@ -120,26 +122,20 @@ def translocate(cohesins, occupied, args):
     """
     # first we try to unload cohesins and free the matching occupied sites 
     for i in range(len(cohesins)):
-        prob = unloadProb(cohesins[i], occupied, args)
-        if np.random.random() <= prob:
+        newly_loaded = False
+
+        released = release(cohesins[i], occupied, args)
+
+        if np.random.random() <= unloadProb(cohesins[i], occupied, args) or released > 0:
             occupied[cohesins[i].left.pos] = 0 
             occupied[cohesins[i].right.pos] = 0 
             loadOne(cohesins, occupied, args, i)
-            # Artificially restep 1, such that the first position for the newly
-            # loaded one is actually on two adjacent monomers
-            # Note: the occupied array will be set properly below.
-            for leg in [-1, 1]:
-                occupied[cohesins[i][leg].pos] = 0
-                cohesins[i][leg].pos -= leg
+            newly_loaded = True
     
-    # then we try to capture and release them by CTCF sites 
-    for i in range(len(cohesins)):
         cohesins[i] = capture(cohesins[i], occupied, args)
-        cohesins[i] = release(cohesins[i], occupied, args)
     
-    # finally we translocate, and mark stalled cohesins because 
-    # the unloadProb needs this 
-    for i in range(len(cohesins)):
+        # finally we translocate, and mark stalled cohesins because 
+        # the unloadProb needs this 
         cohesin = cohesins[i] 
         for leg in [-1,1]: 
             if not cohesin[leg].attrs["CTCF"]: 
@@ -151,7 +147,8 @@ def translocate(cohesins, occupied, args):
                     occupied[cohesin[leg].pos] = 0
                     occupied[cohesin[leg].pos + leg] = 1
                     cohesin[leg].pos += leg        
-        cohesins[i] = cohesin
+        if not newly_loaded:
+            cohesins[i] = cohesin
 
 def run_1d(N_mono, N_SMC, frames,
         CTCFs_left=None, CTCFs_right=None, CTCF_dict=None,
@@ -219,7 +216,7 @@ def run_1d(N_mono, N_SMC, frames,
         ctcfCaptureleft = CTCF_dict['captureLeft']
         ctcfCaptureright = CTCF_dict['captureRight']
         ctcfReleaseleft = CTCF_dict['releaseLeft']
-        ctcfReleaseleft = CTCF_dict['releaseRight']
+        ctcfReleaseright = CTCF_dict['releaseRight']
 
     args = {}
     args['ctcfRelease'] = {-1 : ctcfReleaseleft, 1 : ctcfReleaseright}

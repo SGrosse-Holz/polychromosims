@@ -91,13 +91,13 @@ def proc(params):
                 if len(params.extrusion_CTCFs) is not 2:
                     raise ValueError("Did not understand CTCF list!")
                 params.extrusion_CTCFdict = {}
-                params.extrusion_CTCFdict['captureLeft'] = 
+                params.extrusion_CTCFdict['captureLeft'] = \
                         {ctcf : params.extrusion_p_capture for ctcf in params.extrusion_CTCFs[0]}
-                params.extrusion_CTCFdict['captureRight'] = 
+                params.extrusion_CTCFdict['captureRight'] = \
                         {ctcf : params.extrusion_p_capture for ctcf in params.extrusion_CTCFs[1]}
-                params.extrusion_CTCFdict['releaseLeft'] = 
+                params.extrusion_CTCFdict['releaseLeft'] = \
                         {ctcf : params.extrusion_p_releasePerStep for ctcf in params.extrusion_CTCFs[0]}
-                params.extrusion_CTCFdict['releaseRight'] = 
+                params.extrusion_CTCFdict['releaseRight'] = \
                         {ctcf : params.extrusion_p_releasePerStep for ctcf in params.extrusion_CTCFs[1]}
             else:
                 if not isinstance(params.extrusion_CTCFs, dict):

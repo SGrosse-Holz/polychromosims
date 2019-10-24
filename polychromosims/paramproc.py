@@ -66,6 +66,13 @@ def proc(params):
     if params.PBCbox == "density":
         pbcdim = (params.N * params.sphconf_density)**(1/3)
         params.PBCbox = [pbcdim, pbcdim, pbcdim]
+
+    # Crosslinks
+    if params.add_crosslinks:
+        if not 'cl_bondWiggleDist' in dir(params):
+            params.cl_bondWiggleDist = params.chain_bondwiggledist
+        if not 'cl_bondLength' in dir(params):
+            params.cl_bondLength = params.chain_bondlength
     
     # Lamina attraction radius
     if params.add_lamina_attraction:
