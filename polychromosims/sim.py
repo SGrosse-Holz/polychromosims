@@ -52,7 +52,7 @@ def setStartingConf(sim):
     elif params.start_from == "custom":
         polymer = params.gen_start_conf()
     else:
-        raise ValueError(params.errorString("start_from", params.start_from))
+        raise ValueError("params.start_from")
     
     sim.set_data(polymer, center=True)  # Do we want centering as an option?
     return sim
@@ -91,7 +91,7 @@ def addForces(sim):
         nb_kwargs = {
                 'trunc':params.chain_nb_repEnergy}
     else:
-        raise ValueError(params.errorString("chain_nonbonded", params.chain_nonbonded))
+        raise ValueError("params.chain_nonbonded")
 
     sim.add_force(
         forcekits.polymer_chains(

@@ -8,14 +8,30 @@ import math
 from polychrom.hdf5_format import load_hdf5_file
 
 from mootils.save_module_to_script import mod2py
-from polychromosims import globalvars
+from . import globalvars
+from . import params_default
 
 def update_from_cmd(params):
     for arg in sys.argv:
         if arg[:7] == "params.":
             exec(arg)
 
+def update_from_defaults(params):
+    """
+    Set all the parameters not set in the params file to (ideally)
+    reasonable defaults.
+
+    There should be no need to call this function explicitly, since that is
+    done by proc()
+    """
+    for att in dir(params_default):
+        if not att.startswith("_") and att not in dir(params):
+            setattr(params, att, getattr(params_default, att))
+
 def proc(params):
+    # Making sure that all the attributes exist
+    update_from_defaults(params)
+
     # ------------------- Resolving special keywords in the parameters ----------------------------
     # NOTE: this should not set anything unconditionally, such that it does not
     # unexpectedly overwrite anything. It is just supposed to resolve keywords
@@ -85,12 +101,14 @@ def proc(params):
         params.extrusion_stepsPerBlock = max(params.steps_per_block // params.extrusion_MDstepsPerStep, 1)
         params.steps_per_block = params.extrusion_MDstepsPerStep*params.extrusion_stepsPerBlock
         params.extrusion_blocksPerRestart = math.ceil(params.extrusion_stepsPerRestart / params.extrusion_stepsPerBlock)
+        if params.extrusion_blocksPerRestart > params.total_blocks:
+            params.extrusion_blocksPerRestart = params.total_blocks
         params.extrusion_stepsPerRestart = params.extrusion_blocksPerRestart * params.extrusion_stepsPerBlock
         params.extrusion_totalRestarts = math.ceil(params.total_blocks / params.extrusion_blocksPerRestart)
 
         # CTCFs can be given in a variety of formats
         if 'extrusion_CTCFs' in dir(params):
-            if isinstance(params.extrusion_CTCFs, list) and len(params.extrusion_CTCFs) > 2:
+            if isinstance(params.extrusion_CTCFs, list) and len(params.extrusion_CTCFs) != 2:
                 params.extrusion_CTCFs = np.array(params.extrusion_CTCFs)
             if isinstance(params.extrusion_CTCFs, np.ndarray):
                 params.extrusion_CTCFs = [params.extrusion_CTCFs, params.extrusion_CTCFs]
@@ -169,8 +187,7 @@ def write_processed(params):
 def start_editing(params):
     # Save the stuff that should not be reloaded
     folder = params.folder
-    if params.chain_nonbonded == "hetero":
-        extrahard = params.chain_nb_extrahard
+    extrahard = params.chain_nb_extrahard
 
     params_modspec = globalvars.params_modspec
 
@@ -181,8 +198,7 @@ def start_editing(params):
 
     # Set saved stuff
     params.save_to = folder
-    if params.chain_nonbonded == "hetero":
-        params.chain_nb_extrahard = extrahard
+    params.chain_nb_extrahard = extrahard
 
     # Get command line values
     update_from_cmd(params)

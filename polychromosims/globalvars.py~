@@ -2,4 +2,4 @@
 params_allow_execution = False # Prevent params.py from doing anything that
                                # modifies things outside itself, such as
                                # creating or emptying a directory
-params_save_processed = True # Save processed params.py
+params_write_processed = True # Save processed params.py
