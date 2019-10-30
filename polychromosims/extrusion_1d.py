@@ -126,7 +126,7 @@ def translocate(cohesins, occupied, args):
 
         released = release(cohesins[i], occupied, args)
 
-        if np.random.random() <= unloadProb(cohesins[i], occupied, args) or released > 0:
+        if np.random.random() <= unloadProb(cohesins[i], occupied, args):# or released > 0:
             occupied[cohesins[i].left.pos] = 0 
             occupied[cohesins[i].right.pos] = 0 
             loadOne(cohesins, occupied, args, i)
