@@ -7,7 +7,7 @@ import math
 
 from polychrom.hdf5_format import load_hdf5_file
 
-from mootils.save_module_to_script import mod2py
+from .save_module_to_script import mod2py
 from . import globalvars
 from . import params_default
 

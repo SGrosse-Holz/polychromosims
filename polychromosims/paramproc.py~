@@ -101,9 +101,8 @@ def proc(params):
         params.extrusion_stepsPerBlock = max(params.steps_per_block // params.extrusion_MDstepsPerStep, 1)
         params.steps_per_block = params.extrusion_MDstepsPerStep*params.extrusion_stepsPerBlock
         params.extrusion_blocksPerRestart = math.ceil(params.extrusion_stepsPerRestart / params.extrusion_stepsPerBlock)
-        if params.extrusion_blocksPerRestart < params.total_blocks:
+        if params.extrusion_blocksPerRestart > params.total_blocks:
             params.extrusion_blocksPerRestart = params.total_blocks
-            params.extrusion_stepsPerRestart = params.extrusion_stepsPerBlock * params.extrusion_blocksPerRestart
         params.extrusion_stepsPerRestart = params.extrusion_blocksPerRestart * params.extrusion_stepsPerBlock
         params.extrusion_totalRestarts = math.ceil(params.total_blocks / params.extrusion_blocksPerRestart)
 
